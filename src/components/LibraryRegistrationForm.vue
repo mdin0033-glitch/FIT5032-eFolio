@@ -10,56 +10,82 @@
           <div class="row mb-3">
             <div class="col-sm-6">
               <label for="username" class="form-label">Username</label>
+
               <input
                 type="text"
                 id="username"
                 class="form-control"
                 v-model="formData.username"
+                required
+                oninvalid="this.setCustomValidity('Please fill out this field.')"
+                oninput="this.setCustomValidity('')"
               />
             </div>
 
             <div class="col-sm-6">
               <label for="password" class="form-label">Password</label>
+
               <input
                 type="password"
                 id="password"
                 class="form-control"
                 v-model="formData.password"
+                required
+                minlength="4"
+                maxlength="10"
+                oninvalid="this.setCustomValidity('Password must be between 4 and 10 characters.')"
+                oninput="this.setCustomValidity('')"
               />
             </div>
           </div>
 
           <div class="row mb-3">
+
             <div class="col-sm-6">
               <div class="form-check">
+
                 <input
                   type="checkbox"
                   id="isAustralian"
                   class="form-check-input"
                   v-model="formData.isAustralian"
                 />
-                <label for="isAustralian" class="form-check-label">
+
+                <label
+                  for="isAustralian"
+                  class="form-check-label"
+                >
                   Australian Resident?
                 </label>
+
               </div>
             </div>
 
             <div class="col-sm-6">
-              <label for="gender" class="form-label">Gender</label>
+
+              <label for="gender" class="form-label">
+                Gender
+              </label>
+
               <select
                 id="gender"
                 class="form-select"
                 v-model="formData.gender"
+                required
+                oninvalid="this.setCustomValidity('Please select a gender.')"
+                onchange="this.setCustomValidity('')"
               >
-                <option value=""></option>
+                <option value="">Please select</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
+
             </div>
           </div>
 
           <div class="mb-3">
+
             <label for="reason" class="form-label">
               Reason for joining
             </label>
@@ -69,10 +95,17 @@
               class="form-control"
               rows="3"
               v-model="formData.reason"
+              required
+              minlength="5"
+              maxlength="100"
+              oninvalid="this.setCustomValidity('Please enter a reason of at least 5 characters.')"
+              oninput="this.setCustomValidity('')"
             ></textarea>
+
           </div>
 
           <div class="text-center">
+
             <button
               type="submit"
               class="btn btn-primary me-2"
@@ -87,6 +120,7 @@
             >
               Clear
             </button>
+
           </div>
 
         </form>
@@ -98,6 +132,7 @@
       class="row mt-5"
       v-if="submittedCards.length"
     >
+
       <div class="d-flex flex-wrap justify-content-center">
 
         <div
@@ -106,11 +141,13 @@
           class="card m-2"
           style="width: 15rem;"
         >
+
           <div class="card-header">
             User Information
           </div>
 
           <ul class="list-group list-group-flush">
+
             <li class="list-group-item">
               Username: {{ card.username }}
             </li>
@@ -131,7 +168,9 @@
             <li class="list-group-item">
               Reason: {{ card.reason }}
             </li>
+
           </ul>
+
         </div>
 
       </div>
