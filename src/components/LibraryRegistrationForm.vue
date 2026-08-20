@@ -150,47 +150,42 @@
 
     <div
       class="row mt-5"
-      v-if="submittedCards.length"
+      v-if="submittedUsers.length"
     >
-      <div class="d-flex flex-wrap justify-content-center">
+      <div class="col-12">
 
-        <div
-          v-for="(card, index) in submittedCards"
-          :key="index"
-          class="card m-2"
-          style="width: 15rem;"
+        <DataTable
+          :value="submittedUsers"
+          tableStyle="min-width: 50rem"
         >
 
-          <div class="card-header">
-            User Information
-          </div>
+          <Column
+            field="username"
+            header="Username"
+          />
 
-          <ul class="list-group list-group-flush">
+          <Column
+            field="password"
+            header="Password"
+          />
 
-            <li class="list-group-item">
-              Username: {{ card.username }}
-            </li>
+          <Column header="Australian Resident">
+            <template #body="slotProps">
+              {{ slotProps.data.isAustralian ? 'true' : 'false' }}
+            </template>
+          </Column>
 
-            <li class="list-group-item">
-              Password: {{ card.password }}
-            </li>
+          <Column
+            field="gender"
+            header="Gender"
+          />
 
-            <li class="list-group-item">
-              Australian Resident:
-              {{ card.isAustralian ? 'Yes' : 'No' }}
-            </li>
+          <Column
+            field="reason"
+            header="Reason"
+          />
 
-            <li class="list-group-item">
-              Gender: {{ card.gender }}
-            </li>
-
-            <li class="list-group-item">
-              Reason: {{ card.reason }}
-            </li>
-
-          </ul>
-
-        </div>
+        </DataTable>
 
       </div>
     </div>
@@ -201,6 +196,9 @@
 <script setup>
 import { ref } from 'vue'
 
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+
 const formData = ref({
   username: '',
   password: '',
@@ -209,7 +207,7 @@ const formData = ref({
   gender: ''
 })
 
-const submittedCards = ref([])
+const submittedUsers = ref([])
 
 const errors = ref({
   username: null,
@@ -301,7 +299,7 @@ const submitForm = () => {
     !errors.value.gender &&
     !errors.value.reason
   ) {
-    submittedCards.value.push({
+    submittedUsers.value.push({
       ...formData.value
     })
 
@@ -329,23 +327,6 @@ const clearForm = () => {
 </script>
 
 <style scoped>
-.card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  background-color: #275fda;
-  color: white;
-  padding: 10px;
-  border-radius: 10px 10px 0 0;
-}
-
-.list-group-item {
-  padding: 10px;
-}
-
 .text-danger {
   font-size: 0.875rem;
   margin-top: 4px;
