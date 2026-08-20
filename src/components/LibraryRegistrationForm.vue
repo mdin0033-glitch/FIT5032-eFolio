@@ -16,10 +16,16 @@
                 id="username"
                 class="form-control"
                 v-model="formData.username"
-                required
-                oninvalid="this.setCustomValidity('Please fill out this field.')"
-                oninput="this.setCustomValidity('')"
+                @blur="validateName(true)"
+                @input="validateName(false)"
               />
+
+              <div
+                v-if="errors.username"
+                class="text-danger"
+              >
+                {{ errors.username }}
+              </div>
             </div>
 
             <div class="col-sm-6">
@@ -30,12 +36,16 @@
                 id="password"
                 class="form-control"
                 v-model="formData.password"
-                required
-                minlength="4"
-                maxlength="10"
-                oninvalid="this.setCustomValidity('Password must be between 4 and 10 characters.')"
-                oninput="this.setCustomValidity('')"
+                @blur="validatePassword(true)"
+                @input="validatePassword(false)"
               />
+
+              <div
+                v-if="errors.password"
+                class="text-danger"
+              >
+                {{ errors.password }}
+              </div>
             </div>
           </div>
 
@@ -71,15 +81,21 @@
                 id="gender"
                 class="form-select"
                 v-model="formData.gender"
-                required
-                oninvalid="this.setCustomValidity('Please select a gender.')"
-                onchange="this.setCustomValidity('')"
+                @blur="validateGender(true)"
+                @change="validateGender(false)"
               >
                 <option value="">Please select</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
+
+              <div
+                v-if="errors.gender"
+                class="text-danger"
+              >
+                {{ errors.gender }}
+              </div>
 
             </div>
           </div>
@@ -95,12 +111,16 @@
               class="form-control"
               rows="3"
               v-model="formData.reason"
-              required
-              minlength="5"
-              maxlength="100"
-              oninvalid="this.setCustomValidity('Please enter a reason of at least 5 characters.')"
-              oninput="this.setCustomValidity('')"
+              @blur="validateReason(true)"
+              @input="validateReason(false)"
             ></textarea>
+
+            <div
+              v-if="errors.reason"
+              class="text-danger"
+            >
+              {{ errors.reason }}
+            </div>
 
           </div>
 
@@ -132,7 +152,6 @@
       class="row mt-5"
       v-if="submittedCards.length"
     >
-
       <div class="d-flex flex-wrap justify-content-center">
 
         <div
@@ -192,10 +211,102 @@ const formData = ref({
 
 const submittedCards = ref([])
 
+const errors = ref({
+  username: null,
+  password: null,
+  resident: null,
+  gender: null,
+  reason: null
+})
+
+const validateName = (blur) => {
+  if (formData.value.username.length < 3) {
+    if (blur) {
+      errors.value.username = 'Name must be at least 3 characters'
+    }
+  } else {
+    errors.value.username = null
+  }
+}
+
+const validatePassword = (blur) => {
+  const password = formData.value.password
+  const minLength = 8
+
+  const hasUppercase = /[A-Z]/.test(password)
+  const hasLowercase = /[a-z]/.test(password)
+  const hasNumber = /\d/.test(password)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+
+  if (password.length < minLength) {
+    if (blur) {
+      errors.value.password =
+        `Password must be at least ${minLength} characters long.`
+    }
+  } else if (!hasUppercase) {
+    if (blur) {
+      errors.value.password =
+        'Password must contain at least one uppercase letter.'
+    }
+  } else if (!hasLowercase) {
+    if (blur) {
+      errors.value.password =
+        'Password must contain at least one lowercase letter.'
+    }
+  } else if (!hasNumber) {
+    if (blur) {
+      errors.value.password =
+        'Password must contain at least one number.'
+    }
+  } else if (!hasSpecialChar) {
+    if (blur) {
+      errors.value.password =
+        'Password must contain at least one special character.'
+    }
+  } else {
+    errors.value.password = null
+  }
+}
+
+const validateGender = (blur) => {
+  if (!formData.value.gender) {
+    if (blur) {
+      errors.value.gender = 'Please select a gender.'
+    }
+  } else {
+    errors.value.gender = null
+  }
+}
+
+const validateReason = (blur) => {
+  if (formData.value.reason.length < 5) {
+    if (blur) {
+      errors.value.reason =
+        'Reason must be at least 5 characters.'
+    }
+  } else {
+    errors.value.reason = null
+  }
+}
+
 const submitForm = () => {
-  submittedCards.value.push({
-    ...formData.value
-  })
+  validateName(true)
+  validatePassword(true)
+  validateGender(true)
+  validateReason(true)
+
+  if (
+    !errors.value.username &&
+    !errors.value.password &&
+    !errors.value.gender &&
+    !errors.value.reason
+  ) {
+    submittedCards.value.push({
+      ...formData.value
+    })
+
+    clearForm()
+  }
 }
 
 const clearForm = () => {
@@ -205,6 +316,14 @@ const clearForm = () => {
     isAustralian: false,
     reason: '',
     gender: ''
+  }
+
+  errors.value = {
+    username: null,
+    password: null,
+    resident: null,
+    gender: null,
+    reason: null
   }
 }
 </script>
@@ -225,5 +344,10 @@ const clearForm = () => {
 
 .list-group-item {
   padding: 10px;
+}
+
+.text-danger {
+  font-size: 0.875rem;
+  margin-top: 4px;
 }
 </style>
