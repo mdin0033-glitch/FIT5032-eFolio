@@ -56,7 +56,7 @@
           </p>
         </div>
 
-        <!-- Rating Form -->
+        <!-- Review Form -->
         <form @submit.prevent="submitReview">
 
           <div class="mb-3">
@@ -71,11 +71,21 @@
               <option value="">
                 Please select
               </option>
-              <option value="1">1 - Poor</option>
-              <option value="2">2 - Fair</option>
-              <option value="3">3 - Good</option>
-              <option value="4">4 - Very Good</option>
-              <option value="5">5 - Excellent</option>
+              <option value="1">
+                1 - Poor
+              </option>
+              <option value="2">
+                2 - Fair
+              </option>
+              <option value="3">
+                3 - Good
+              </option>
+              <option value="4">
+                4 - Very Good
+              </option>
+              <option value="5">
+                5 - Excellent
+              </option>
             </select>
           </div>
 
@@ -88,15 +98,29 @@
               v-model="reviewText"
               class="form-control"
               rows="3"
+              maxlength="300"
               placeholder="Write your review"
             ></textarea>
+
+            <small class="text-muted">
+              Maximum 300 characters.
+            </small>
           </div>
 
+          <!-- Error Message -->
           <div
             v-if="message"
             class="alert alert-danger"
           >
             {{ message }}
+          </div>
+
+          <!-- Success Message -->
+          <div
+            v-if="successMessage"
+            class="alert alert-success"
+          >
+            {{ successMessage }}
           </div>
 
           <button
@@ -108,7 +132,7 @@
 
         </form>
 
-        <!-- Reviews -->
+        <!-- Reviews List -->
         <div
           v-if="reviews.length"
           class="mt-5"
@@ -128,10 +152,15 @@
 
               <p>
                 <strong>
-                  Rating: {{ review.rating }} / 5
+                  Rating:
+                  {{ review.rating }} / 5
                 </strong>
               </p>
 
+              <!--
+                Vue text interpolation automatically escapes HTML.
+                Do not use v-html here.
+              -->
               <p class="card-text">
                 {{ review.comment }}
               </p>
@@ -147,27 +176,36 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed
+} from 'vue'
+
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+// Current logged-in user
 const currentUser = ref(
   JSON.parse(
     localStorage.getItem('currentUser')
   )
 )
 
+// Review form data
 const rating = ref('')
 const reviewText = ref('')
 const message = ref('')
+const successMessage = ref('')
 
+// Existing reviews
 const reviews = ref(
   JSON.parse(
     localStorage.getItem('reviews')
   ) || []
 )
 
+// Calculate average rating
 const averageRating = computed(() => {
   if (reviews.value.length === 0) {
     return '0.0'
@@ -185,27 +223,68 @@ const averageRating = computed(() => {
   ).toFixed(1)
 })
 
-const submitReview = () => {
+// Basic unsafe input detection
+const containsUnsafeInput = (text) => {
+  const unsafePatterns = [
+    /<script/i,
+    /<\/script>/i,
+    /javascript:/i,
+    /onerror\s*=/i,
+    /onload\s*=/i,
+    /onclick\s*=/i,
+    /<iframe/i,
+    /<object/i,
+    /<embed/i
+  ]
 
+  return unsafePatterns.some(
+    (pattern) => pattern.test(text)
+  )
+}
+
+// Submit review
+const submitReview = () => {
+  message.value = ''
+  successMessage.value = ''
+
+  // Rating validation
   if (!rating.value) {
-    message.value = 'Please select a rating.'
+    message.value =
+      'Please select a rating.'
     return
   }
 
-  if (reviewText.value.trim().length < 3) {
+  const cleanedReview =
+    reviewText.value.trim()
+
+  // Review length validation
+  if (cleanedReview.length < 3) {
     message.value =
       'Review must be at least 3 characters.'
     return
   }
 
+  // XSS/basic security validation
+  if (containsUnsafeInput(cleanedReview)) {
+    message.value =
+      'Unsafe content detected. HTML or scripts are not allowed.'
+    return
+  }
+
   const newReview = {
-    username: currentUser.value.username,
-    rating: Number(rating.value),
-    comment: reviewText.value.trim()
+    username:
+      currentUser.value.username,
+
+    rating:
+      Number(rating.value),
+
+    comment:
+      cleanedReview
   }
 
   reviews.value.push(newReview)
 
+  // Save reviews to localStorage
   localStorage.setItem(
     'reviews',
     JSON.stringify(reviews.value)
@@ -213,11 +292,27 @@ const submitReview = () => {
 
   rating.value = ''
   reviewText.value = ''
-  message.value = ''
+
+  successMessage.value =
+    'Review submitted successfully.'
 }
 
+// Logout
 const logout = () => {
-  localStorage.removeItem('currentUser')
+  localStorage.removeItem(
+    'currentUser'
+  )
+
   router.push('/login')
 }
 </script>
+
+<style scoped>
+.card {
+  text-align: left;
+}
+
+.text-muted {
+  font-size: 0.875rem;
+}
+</style>
