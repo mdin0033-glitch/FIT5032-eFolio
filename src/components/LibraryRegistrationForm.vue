@@ -3,13 +3,20 @@
     <div class="row">
       <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2">
 
-        <h1 class="text-center">User Information Form</h1>
+        <h1 class="text-center">W5. Library Registration Form</h1>
+        <p class="text-center">
+          Let's build some more advanced features into our form.
+        </p>
 
         <form @submit.prevent="submitForm">
 
+          <!-- Username + Gender -->
           <div class="row mb-3">
+
             <div class="col-sm-6">
-              <label for="username" class="form-label">Username</label>
+              <label for="username" class="form-label">
+                Username
+              </label>
 
               <input
                 type="text"
@@ -29,50 +36,6 @@
             </div>
 
             <div class="col-sm-6">
-              <label for="password" class="form-label">Password</label>
-
-              <input
-                type="password"
-                id="password"
-                class="form-control"
-                v-model="formData.password"
-                @blur="validatePassword(true)"
-                @input="validatePassword(false)"
-              />
-
-              <div
-                v-if="errors.password"
-                class="text-danger"
-              >
-                {{ errors.password }}
-              </div>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-
-            <div class="col-sm-6">
-              <div class="form-check">
-
-                <input
-                  type="checkbox"
-                  id="isAustralian"
-                  class="form-check-input"
-                  v-model="formData.isAustralian"
-                />
-
-                <label
-                  for="isAustralian"
-                  class="form-check-label"
-                >
-                  Australian Resident?
-                </label>
-
-              </div>
-            </div>
-
-            <div class="col-sm-6">
-
               <label for="gender" class="form-label">
                 Gender
               </label>
@@ -96,10 +59,80 @@
               >
                 {{ errors.gender }}
               </div>
+            </div>
+
+          </div>
+
+          <!-- Password + Confirm Password -->
+          <div class="row mb-3">
+
+            <div class="col-sm-6">
+              <label for="password" class="form-label">
+                Password
+              </label>
+
+              <input
+                type="password"
+                id="password"
+                class="form-control"
+                v-model="formData.password"
+                @blur="validatePassword(true)"
+                @input="validatePassword(false)"
+              />
+
+              <div
+                v-if="errors.password"
+                class="text-danger"
+              >
+                {{ errors.password }}
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="confirm-password" class="form-label">
+                Confirm password
+              </label>
+
+              <input
+                type="password"
+                id="confirm-password"
+                class="form-control"
+                v-model="formData.confirmPassword"
+                @blur="validateConfirmPassword(true)"
+              />
+
+              <div
+                v-if="errors.confirmPassword"
+                class="text-danger"
+              >
+                {{ errors.confirmPassword }}
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Australian Resident -->
+          <div class="mb-3">
+            <div class="form-check">
+
+              <input
+                type="checkbox"
+                id="isAustralian"
+                class="form-check-input"
+                v-model="formData.isAustralian"
+              />
+
+              <label
+                for="isAustralian"
+                class="form-check-label"
+              >
+                Australian Resident?
+              </label>
 
             </div>
           </div>
 
+          <!-- Reason -->
           <div class="mb-3">
 
             <label for="reason" class="form-label">
@@ -122,8 +155,16 @@
               {{ errors.reason }}
             </div>
 
+            <div
+              v-if="friendMessage"
+              class="text-success"
+            >
+              Great to have a friend
+            </div>
+
           </div>
 
+          <!-- Buttons -->
           <div class="text-center">
 
             <button
@@ -148,11 +189,14 @@
       </div>
     </div>
 
+    <!-- PrimeVue DataTable -->
     <div
       class="row mt-5"
       v-if="submittedUsers.length"
     >
       <div class="col-12">
+
+        <h5>This is a PrimeVue DataTable.</h5>
 
         <DataTable
           :value="submittedUsers"
@@ -194,7 +238,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -202,6 +246,7 @@ import Column from 'primevue/column'
 const formData = ref({
   username: '',
   password: '',
+  confirmPassword: '',
   isAustralian: false,
   reason: '',
   gender: ''
@@ -212,6 +257,7 @@ const submittedUsers = ref([])
 const errors = ref({
   username: null,
   password: null,
+  confirmPassword: null,
   resident: null,
   gender: null,
   reason: null
@@ -220,7 +266,8 @@ const errors = ref({
 const validateName = (blur) => {
   if (formData.value.username.length < 3) {
     if (blur) {
-      errors.value.username = 'Name must be at least 3 characters'
+      errors.value.username =
+        'Name must be at least 3 characters'
     }
   } else {
     errors.value.username = null
@@ -234,7 +281,8 @@ const validatePassword = (blur) => {
   const hasUppercase = /[A-Z]/.test(password)
   const hasLowercase = /[a-z]/.test(password)
   const hasNumber = /\d/.test(password)
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  const hasSpecialChar =
+    /[!@#$%^&*(),.?":{}|<>]/.test(password)
 
   if (password.length < minLength) {
     if (blur) {
@@ -266,10 +314,25 @@ const validatePassword = (blur) => {
   }
 }
 
+const validateConfirmPassword = (blur) => {
+  if (
+    formData.value.password !==
+    formData.value.confirmPassword
+  ) {
+    if (blur) {
+      errors.value.confirmPassword =
+        'Passwords do not match.'
+    }
+  } else {
+    errors.value.confirmPassword = null
+  }
+}
+
 const validateGender = (blur) => {
   if (!formData.value.gender) {
     if (blur) {
-      errors.value.gender = 'Please select a gender.'
+      errors.value.gender =
+        'Please select a gender.'
     }
   } else {
     errors.value.gender = null
@@ -287,15 +350,23 @@ const validateReason = (blur) => {
   }
 }
 
+const friendMessage = computed(() => {
+  return formData.value.reason
+    .toLowerCase()
+    .includes('friend')
+})
+
 const submitForm = () => {
   validateName(true)
   validatePassword(true)
+  validateConfirmPassword(true)
   validateGender(true)
   validateReason(true)
 
   if (
     !errors.value.username &&
     !errors.value.password &&
+    !errors.value.confirmPassword &&
     !errors.value.gender &&
     !errors.value.reason
   ) {
@@ -311,6 +382,7 @@ const clearForm = () => {
   formData.value = {
     username: '',
     password: '',
+    confirmPassword: '',
     isAustralian: false,
     reason: '',
     gender: ''
@@ -319,6 +391,7 @@ const clearForm = () => {
   errors.value = {
     username: null,
     password: null,
+    confirmPassword: null,
     resident: null,
     gender: null,
     reason: null
@@ -328,6 +401,11 @@ const clearForm = () => {
 
 <style scoped>
 .text-danger {
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.text-success {
   font-size: 0.875rem;
   margin-top: 4px;
 }
