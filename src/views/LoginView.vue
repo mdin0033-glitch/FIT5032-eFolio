@@ -2,12 +2,14 @@
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-6">
+
         <h2 class="text-center mb-4">Login</h2>
 
         <form @submit.prevent="login">
 
           <div class="mb-3">
             <label class="form-label">Username</label>
+
             <input
               v-model="username"
               type="text"
@@ -17,6 +19,7 @@
 
           <div class="mb-3">
             <label class="form-label">Password</label>
+
             <input
               v-model="password"
               type="password"
@@ -42,10 +45,12 @@
 
         <p class="text-center mt-3">
           Don't have an account?
+
           <router-link to="/register">
             Register
           </router-link>
         </p>
+
       </div>
     </div>
   </div>
@@ -62,7 +67,29 @@ const message = ref('')
 const router = useRouter()
 
 const login = () => {
-  const storedUser = localStorage.getItem('registeredUser')
+
+  // Admin account
+  if (
+    username.value === 'admin' &&
+    password.value === 'Admin123!'
+  ) {
+    const adminUser = {
+      username: 'admin',
+      role: 'admin'
+    }
+
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(adminUser)
+    )
+
+    router.push('/home')
+    return
+  }
+
+  // Normal registered user
+  const storedUser =
+    localStorage.getItem('registeredUser')
 
   if (!storedUser) {
     message.value = 'No registered user found.'
@@ -75,10 +102,15 @@ const login = () => {
     username.value === user.username &&
     password.value === user.password
   ) {
-    localStorage.setItem('currentUser', JSON.stringify(user))
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(user)
+    )
+
     router.push('/home')
   } else {
-    message.value = 'Invalid username or password.'
+    message.value =
+      'Invalid username or password.'
   }
 }
 </script>

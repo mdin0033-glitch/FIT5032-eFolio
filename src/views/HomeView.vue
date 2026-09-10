@@ -1,18 +1,37 @@
 <template>
   <div class="container mt-5 text-center">
+
     <h2>Welcome</h2>
 
-    <p v-if="currentUser">
-      Logged in as:
-      <strong>{{ currentUser.username }}</strong>
-    </p>
+    <div v-if="currentUser">
 
-    <button
-      class="btn btn-danger"
-      @click="logout"
-    >
-      Logout
-    </button>
+      <p>
+        Logged in as:
+        <strong>{{ currentUser.username }}</strong>
+      </p>
+
+      <p>
+        Role:
+        <strong>{{ currentUser.role }}</strong>
+      </p>
+
+      <router-link
+        v-if="currentUser.role === 'admin'"
+        to="/admin"
+        class="btn btn-primary me-2"
+      >
+        Admin Dashboard
+      </router-link>
+
+      <button
+        class="btn btn-danger"
+        @click="logout"
+      >
+        Logout
+      </button>
+
+    </div>
+
   </div>
 </template>
 
@@ -23,7 +42,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const currentUser = ref(
-  JSON.parse(localStorage.getItem('currentUser'))
+  JSON.parse(
+    localStorage.getItem('currentUser')
+  )
 )
 
 const logout = () => {
