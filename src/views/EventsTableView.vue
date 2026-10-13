@@ -6,6 +6,7 @@
     </nav>
     <h1>Community Events</h1>
     <p>Environmental learning activities in Melbourne. Coursework example events illustrate the application; their dates and statuses are sample data, not real bookings.</p>
+    <p v-if="notice" role="status" class="alert alert-info">{{ notice }}</p>
     <InteractiveDataTable table-id="events-table" title="Community Events" filename="climatelearn-events" :columns="columns" :rows="tableRows" :loading="loading" :error="error" @refresh="load" />
   </main>
 </template>
@@ -14,7 +15,7 @@
 import { computed } from 'vue'
 import InteractiveDataTable from '../components/InteractiveDataTable.vue'
 import { useFirestoreTable } from '../composables/useFirestoreTable'
-const { rows, loading, error, load } = useFirestoreTable('events')
+const { rows, loading, error, notice, load } = useFirestoreTable('events')
 const columns = [
   { key: 'title', label: 'Event title' },
   { key: 'category', label: 'Category' },

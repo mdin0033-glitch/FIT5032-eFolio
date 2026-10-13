@@ -2,7 +2,9 @@ import { onRequest, onCall, HttpsError } from 'firebase-functions/v2/https'
 import { defineSecret, defineString } from 'firebase-functions/params'
 import { onDocumentCreated } from 'firebase-functions/v2/firestore'
 import { initializeApp } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, FieldPath } from 'firebase-admin/firestore'
+import { getAuth } from 'firebase-admin/auth'
+import { publicResource, publicEvent, parsePublicQuery, adminStatistics } from './public-data.js'
 import cors from 'cors'
 import { validateEmailPayload } from './email-validation.js'
 
@@ -110,6 +112,67 @@ export const sendEmailWithAttachment = onCall(
     } catch (error) {
       if (error instanceof HttpsError) throw error
       throw new HttpsError('unavailable', 'Email request failed or timed out. Delivery is uncertain; check the recipient inbox before retrying.')
+    }
+  }
+)
+
+function publicCollectionEndpoint(collectionName, responseKey, project) {
+  return onRequest(
+    { region: 'australia-southeast2', maxInstances: 2, invoker: 'public', timeoutSeconds: 30 },
+    (req, res) => allowCors(req, res, async () => {
+      if (req.method !== 'GET') {
+        res.set('Allow', 'GET').status(405).json({ error: 'This endpoint only accepts GET.' })
+        return
+      }
+      let options
+      try { options = parsePublicQuery(req.query) } catch (error) {
+        res.status(400).json({ error: error.message })
+        return
+      }
+      try {
+        let query = db.collection(collectionName).orderBy(FieldPath.documentId())
+        if (options.category) query = query.where('category', '==', options.category)
+        if (options.cursor) query = query.startAfter(options.cursor)
+        const snapshot = await query.limit(options.limit + 1).get()
+        const documents = snapshot.docs.slice(0, options.limit)
+        res.set('Cache-Control', 'public, max-age=60').json({
+          [responseKey]: documents.map(document => project(document.id, document.data())),
+          count: documents.length, limit: options.limit,
+          nextCursor: snapshot.docs.length > options.limit ? documents.at(-1).id : null
+        })
+      } catch {
+        res.status(500).json({ error: 'Public data is temporarily unavailable.' })
+      }
+    })
+  )
+}
+export const getPublicResources = publicCollectionEndpoint('books', 'resources', publicResource)
+export const getPublicEvents = publicCollectionEndpoint('events', 'events', publicEvent)
+
+export const getAdminStatistics = onCall(
+  { region: 'australia-southeast2', maxInstances: 2, timeoutSeconds: 60 },
+  async request => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in to access administrator statistics.')
+    if (request.auth.token.admin !== true) throw new HttpsError('permission-denied', 'Administrator access is required.')
+    try {
+      const [resourcesSnapshot, eventsSnapshot] = await Promise.all([
+        db.collection('books').get(), db.collection('events').get()
+      ])
+      const records = (snapshot, project) => snapshot.docs.map(document => ({
+        ...project(document.id, document.data()), createdAt: document.createTime.toDate().toISOString()
+      }))
+      let userCount = 0
+      try {
+        let pageToken
+        do {
+          const page = await getAuth().listUsers(1000, pageToken)
+          userCount += page.users.length
+          pageToken = page.pageToken
+        } while (pageToken)
+      } catch { userCount = null }
+      return adminStatistics(records(resourcesSnapshot, publicResource), records(eventsSnapshot, publicEvent), userCount)
+    } catch {
+      throw new HttpsError('unavailable', 'Administrator statistics are temporarily unavailable.')
     }
   }
 )

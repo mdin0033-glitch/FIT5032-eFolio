@@ -6,7 +6,6 @@ import {
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import AdminView from '../views/AdminView.vue'
 
 import FirebaseRegisterView from '../views/FirebaseRegisterView.vue'
 import FirebaseSigninView from '../views/FirebaseSigninView.vue'
@@ -17,8 +16,11 @@ import CountBookAPI from '../views/CountBookAPI.vue'
 import GetAllBookAPI from '../views/GetAllBookAPI.vue'
 import EmailView from '../views/EmailView.vue'
 import { authReady, authUser, isAdmin } from '../firebase/auth'
+import { navigationError } from '../composables/navigationFeedback'
 
 const routes = [
+  { path: '/admin-dashboard', name: 'AdminDashboard', component: () => import('../views/AdminDashboardView.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/api-docs', name: 'ApiDocs', component: () => import('../views/ApiDocsView.vue') },
   { path: '/map', name: 'CommunityMap', component: () => import('../views/CommunityMapView.vue') },
   { path: '/accessibility', name: 'Accessibility', component: () => import('../views/AccessibilityView.vue') },
   { path: '/resources', name: 'ResourcesTable', component: () => import('../views/ResourcesTableView.vue') },
@@ -61,7 +63,7 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    component: AdminView,
+    component: () => import('../views/AdminView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: true
@@ -110,5 +112,12 @@ router.beforeEach(async (to) => {
     return '/home'
   }
 })
+
+router.onError(() => {
+  navigationError.value = navigator.onLine
+    ? 'This page could not be loaded. Reload the page and try again.'
+    : 'This page is not available offline yet. Reconnect, then reload to open it; saved data on the current page remains available.'
+})
+router.afterEach((to, from, failure) => { if (!failure) navigationError.value = '' })
 
 export default router

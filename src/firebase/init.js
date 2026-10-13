@@ -2,12 +2,16 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyARTVY2SNB2aC67dwZ_tuO8TavnkvnVdVo',
-  authDomain: 'fit5032-3db1a.firebaseapp.com',
-  projectId: 'fit5032-3db1a',
-  storageBucket: 'fit5032-3db1a.firebasestorage.app',
-  messagingSenderId: '185430813380',
-  appId: '1:185430813380:web:b00e254d3c88723a7e3791'
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
+}
+
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.authDomain) {
+  throw new Error('Firebase environment configuration is missing. Configure the VITE_FIREBASE variables before building.')
 }
 
 initializeApp(firebaseConfig)

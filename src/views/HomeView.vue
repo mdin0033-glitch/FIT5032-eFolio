@@ -43,6 +43,7 @@
         <nav class="d-flex flex-wrap justify-content-center gap-3 mt-3" aria-label="Learning pages">
           <router-link to="/resources">Education resources</router-link>
           <router-link to="/events">Community events</router-link>
+          <router-link to="/api-docs">Public REST API</router-link>
           <router-link to="/weather">Weather</router-link>
           <router-link to="/map">Community map</router-link>
           <router-link to="/accessibility">Accessibility</router-link>

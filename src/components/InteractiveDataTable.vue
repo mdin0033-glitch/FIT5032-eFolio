@@ -19,6 +19,8 @@
       </div>
     </fieldset>
 
+    <p class="small">Filters and sorting are saved on this browser.</p>
+    <p v-if="storageError" role="alert" class="alert alert-warning">Browser storage is unavailable. Your table preferences cannot be saved.</p>
     <p v-if="loading" role="status" class="alert alert-info">Loading live Firestore data…</p>
     <p v-if="error" role="alert" class="alert alert-danger">{{ error }}</p>
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -65,6 +67,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { cellText, filterRows, sortRows } from '../utils/table-data'
 import { downloadCsv, downloadPdf } from '../utils/table-export'
+import { readSaved, writeSaved, tablePreferences } from '../utils/browser-storage'
 
 const props = defineProps({
   tableId: { type: String, required: true },
@@ -77,10 +80,13 @@ const props = defineProps({
 })
 defineEmits(['refresh'])
 const pageSize = 10
-const search = ref('')
-const filters = reactive({})
-const sortKey = ref(props.columns[0].key)
-const sortDirection = ref('ascending')
+const storageKey = 'climatelearn:table:' + props.tableId
+const saved = tablePreferences(readSaved(storageKey), props.columns)
+const search = ref(saved.search)
+const filters = reactive(saved.filters)
+const sortKey = ref(saved.sortKey)
+const sortDirection = ref(saved.sortDirection)
+const storageError = ref(false)
 const page = ref(1)
 const exporting = ref(false)
 const exportMessage = ref('')
@@ -89,7 +95,10 @@ const filtered = computed(() => sortRows(filterRows(props.rows, props.columns, s
 const pageCount = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)))
 const start = computed(() => (page.value - 1) * pageSize)
 const visibleRows = computed(() => filtered.value.slice(start.value, start.value + pageSize))
-watch([search, filters, sortKey, sortDirection], () => { page.value = 1; exportMessage.value = ''; exportError.value = '' }, { deep: true })
+watch([search, filters, sortKey, sortDirection], () => {
+  page.value = 1; exportMessage.value = ''; exportError.value = ''
+  storageError.value = !writeSaved(storageKey, { search: search.value, filters: { ...filters }, sortKey: sortKey.value, sortDirection: sortDirection.value })
+}, { deep: true })
 watch(pageCount, count => { page.value = Math.min(page.value, count) })
 function sortBy(key) {
   sortDirection.value = sortKey.value === key && sortDirection.value === 'ascending' ? 'descending' : 'ascending'
