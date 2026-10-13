@@ -1,9 +1,9 @@
 <template>
-  <div class="container mt-5">
+  <main class="container mt-5">
 
     <!-- User Information -->
     <div class="text-center">
-      <h2>Welcome</h2>
+      <h1>Welcome</h1>
 
       <div v-if="currentUser">
         <p>
@@ -44,6 +44,8 @@
           <router-link to="/resources">Education resources</router-link>
           <router-link to="/events">Community events</router-link>
           <router-link to="/weather">Weather</router-link>
+          <router-link to="/map">Community map</router-link>
+          <router-link to="/accessibility">Accessibility</router-link>
           <router-link to="/email">Send a resource</router-link>
           <router-link to="/count-book-api">CountBookAPI</router-link>
           <router-link to="/get-all-book-api">GetAllBookAPI</router-link>
@@ -78,11 +80,12 @@
         <form @submit.prevent="submitReview">
 
           <div class="mb-3">
-            <label class="form-label">
+            <label class="form-label" for="review-rating">
               Rating
             </label>
 
             <select
+              id="review-rating"
               v-model="rating"
               class="form-select"
             >
@@ -108,11 +111,12 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">
+            <label class="form-label" for="review-text">
               Review
             </label>
 
             <textarea
+              id="review-text"
               v-model="reviewText"
               class="form-control"
               rows="3"
@@ -129,6 +133,7 @@
           <div
             v-if="message"
             class="alert alert-danger"
+            role="alert"
           >
             {{ message }}
           </div>
@@ -137,6 +142,7 @@
           <div
             v-if="successMessage"
             class="alert alert-success"
+            role="status"
           >
             {{ successMessage }}
           </div>
@@ -190,7 +196,7 @@
       </div>
     </div>
 
-  </div>
+  </main>
 </template>
 
 <script setup>
