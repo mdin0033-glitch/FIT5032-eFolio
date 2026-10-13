@@ -40,7 +40,9 @@
         <router-link to="/get-book-count" class="btn btn-outline-primary ms-2">
           Book Counter
         </router-link>
-        <nav class="d-flex justify-content-center gap-3 mt-3" aria-label="Week 10 pages">
+        <nav class="d-flex flex-wrap justify-content-center gap-3 mt-3" aria-label="Learning pages">
+          <router-link to="/resources">Education resources</router-link>
+          <router-link to="/events">Community events</router-link>
           <router-link to="/weather">Weather</router-link>
           <router-link to="/email">Send a resource</router-link>
           <router-link to="/count-book-api">CountBookAPI</router-link>

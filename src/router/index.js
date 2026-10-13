@@ -19,6 +19,8 @@ import EmailView from '../views/EmailView.vue'
 import { authReady, authUser, isAdmin } from '../firebase/auth'
 
 const routes = [
+  { path: '/resources', name: 'ResourcesTable', component: () => import('../views/ResourcesTableView.vue') },
+  { path: '/events', name: 'EventsTable', component: () => import('../views/EventsTableView.vue') },
   { path: '/email', name: 'Email', component: EmailView, meta: { requiresAuth: true } },
   { path: '/weather', name: 'WeatherView', component: WeatherView },
   { path: '/count-book-api', name: 'CountBookAPI', component: CountBookAPI },
