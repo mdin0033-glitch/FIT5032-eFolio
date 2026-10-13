@@ -44,3 +44,6 @@ __screenshots__/
 node_modules/
 dist/
 .vscode/
+
+# Firebase Hosting local cache
+.firebase/
