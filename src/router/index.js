@@ -8,21 +8,40 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AdminView from '../views/AdminView.vue'
 
+import FirebaseRegisterView from '../views/FirebaseRegisterView.vue'
+import FirebaseSigninView from '../views/FirebaseSigninView.vue'
+import AddBookView from '../views/AddBookView.vue'
+import GetBookCountView from '../views/GetBookCountView.vue'
+import WeatherView from '../views/WeatherView.vue'
+import CountBookAPI from '../views/CountBookAPI.vue'
+import GetAllBookAPI from '../views/GetAllBookAPI.vue'
+
 const routes = [
+  { path: '/weather', name: 'WeatherView', component: WeatherView },
+  { path: '/count-book-api', name: 'CountBookAPI', component: CountBookAPI },
+  { path: '/get-all-book-api', name: 'GetAllBookAPI', component: GetAllBookAPI },
+  {
+    path: '/get-book-count',
+    name: 'GetBookCount',
+    component: GetBookCountView
+  },
   {
     path: '/',
     redirect: '/login'
   },
+
   {
     path: '/login',
     name: 'Login',
     component: LoginView
   },
+
   {
     path: '/register',
     name: 'Register',
     component: RegisterView
   },
+
   {
     path: '/home',
     name: 'Home',
@@ -31,6 +50,7 @@ const routes = [
       requiresAuth: true
     }
   },
+
   {
     path: '/admin',
     name: 'Admin',
@@ -39,6 +59,24 @@ const routes = [
       requiresAuth: true,
       requiresAdmin: true
     }
+  },
+
+  {
+    path: '/FireRegister',
+    name: 'FireRegister',
+    component: FirebaseRegisterView
+  },
+
+  {
+    path: '/FireLogin',
+    name: 'FireLogin',
+    component: FirebaseSigninView
+  },
+
+  {
+    path: '/add-book',
+    name: 'AddBook',
+    component: AddBookView
   }
 ]
 
@@ -48,7 +86,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-
   const storedUser =
     localStorage.getItem('currentUser')
 

@@ -24,12 +24,27 @@
           Admin Dashboard
         </router-link>
 
+        <router-link
+          to="/add-book"
+          class="btn btn-success me-2"
+        >
+          Add Book
+        </router-link>
+
         <button
           class="btn btn-danger"
           @click="logout"
         >
           Logout
         </button>
+        <router-link to="/get-book-count" class="btn btn-outline-primary ms-2">
+          Book Counter
+        </router-link>
+        <nav class="d-flex justify-content-center gap-3 mt-3" aria-label="Week 10 pages">
+          <router-link to="/weather">Weather</router-link>
+          <router-link to="/count-book-api">CountBookAPI</router-link>
+          <router-link to="/get-all-book-api">GetAllBookAPI</router-link>
+        </nav>
       </div>
     </div>
 
@@ -182,8 +197,10 @@ import {
 } from 'vue'
 
 import { useRouter } from 'vue-router'
+import { getAuth, signOut } from 'firebase/auth'
 
 const router = useRouter()
+const auth = getAuth()
 
 // Current logged-in user
 const currentUser = ref(
@@ -298,12 +315,17 @@ const submitReview = () => {
 }
 
 // Logout
-const logout = () => {
-  localStorage.removeItem(
-    'currentUser'
-  )
+const logout = async () => {
+  try {
+    await signOut(auth)
+  } catch (error) {
+    console.error('Firebase sign out failed:', error)
+  }
 
-  router.push('/login')
+  localStorage.removeItem('currentUser')
+  currentUser.value = null
+
+  await router.push('/login')
 }
 </script>
 
