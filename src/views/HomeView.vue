@@ -42,6 +42,7 @@
         </router-link>
         <nav class="d-flex justify-content-center gap-3 mt-3" aria-label="Week 10 pages">
           <router-link to="/weather">Weather</router-link>
+          <router-link to="/email">Send a resource</router-link>
           <router-link to="/count-book-api">CountBookAPI</router-link>
           <router-link to="/get-all-book-api">GetAllBookAPI</router-link>
         </nav>
@@ -197,17 +198,16 @@ import {
 } from 'vue'
 
 import { useRouter } from 'vue-router'
-import { getAuth, signOut } from 'firebase/auth'
+import { signOut } from 'firebase/auth'
+import { auth, authUser, isAdmin } from '../firebase/auth'
 
 const router = useRouter()
-const auth = getAuth()
 
 // Current logged-in user
-const currentUser = ref(
-  JSON.parse(
-    localStorage.getItem('currentUser')
-  )
-)
+const currentUser = computed(() => authUser.value ? {
+  username: authUser.value.displayName || authUser.value.email,
+  role: isAdmin.value ? 'admin' : 'user'
+} : null)
 
 // Review form data
 const rating = ref('')
@@ -321,9 +321,6 @@ const logout = async () => {
   } catch (error) {
     console.error('Firebase sign out failed:', error)
   }
-
-  localStorage.removeItem('currentUser')
-  currentUser.value = null
 
   await router.push('/login')
 }

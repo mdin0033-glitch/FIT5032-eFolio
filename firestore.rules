@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.token.admin == true; }
+    function validBook() {
+      return request.resource.data.keys().hasAll(['isbn', 'name'])
+        && request.resource.data.isbn is number
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200;
+    }
+    match /books/{bookId} {
+      allow read: if true;
+      allow create, update: if signedIn() && validBook();
+      allow delete: if signedIn();
+    }
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+    match /_emailRateLimits/{document} {
+      allow read, write: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

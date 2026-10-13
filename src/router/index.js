@@ -15,8 +15,11 @@ import GetBookCountView from '../views/GetBookCountView.vue'
 import WeatherView from '../views/WeatherView.vue'
 import CountBookAPI from '../views/CountBookAPI.vue'
 import GetAllBookAPI from '../views/GetAllBookAPI.vue'
+import EmailView from '../views/EmailView.vue'
+import { authReady, authUser, isAdmin } from '../firebase/auth'
 
 const routes = [
+  { path: '/email', name: 'Email', component: EmailView, meta: { requiresAuth: true } },
   { path: '/weather', name: 'WeatherView', component: WeatherView },
   { path: '/count-book-api', name: 'CountBookAPI', component: CountBookAPI },
   { path: '/get-all-book-api', name: 'GetAllBookAPI', component: GetAllBookAPI },
@@ -76,7 +79,8 @@ const routes = [
   {
     path: '/add-book',
     name: 'AddBook',
-    component: AddBookView
+    component: AddBookView,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -85,25 +89,19 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
-  const storedUser =
-    localStorage.getItem('currentUser')
-
-  const currentUser =
-    storedUser
-      ? JSON.parse(storedUser)
-      : null
+router.beforeEach(async (to) => {
+  await authReady
 
   if (
     to.meta.requiresAuth &&
-    !currentUser
+    !authUser.value
   ) {
-    return '/login'
+    return { path: '/login', query: { redirect: to.fullPath } }
   }
 
   if (
     to.meta.requiresAdmin &&
-    currentUser?.role !== 'admin'
+    !isAdmin.value
   ) {
     return '/home'
   }
