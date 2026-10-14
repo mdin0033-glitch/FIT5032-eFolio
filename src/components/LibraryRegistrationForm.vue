@@ -189,48 +189,32 @@
       </div>
     </div>
 
-    <!-- PrimeVue DataTable -->
-    <div
-      class="row mt-5"
-      v-if="submittedUsers.length"
-    >
+    <!-- Submitted registration data -->
+    <div class="row mt-5" v-if="submittedUsers.length">
       <div class="col-12">
-
-        <h5>This is a PrimeVue DataTable.</h5>
-
-        <DataTable
-          :value="submittedUsers"
-          tableStyle="min-width: 50rem"
-        >
-
-          <Column
-            field="username"
-            header="Username"
-          />
-
-          <Column
-            field="password"
-            header="Password"
-          />
-
-          <Column header="Australian Resident">
-            <template #body="slotProps">
-              {{ slotProps.data.isAustralian ? 'true' : 'false' }}
-            </template>
-          </Column>
-
-          <Column
-            field="gender"
-            header="Gender"
-          />
-
-          <Column
-            field="reason"
-            header="Reason"
-          />
-
-        </DataTable>
-
+        <h5>Submitted registrations</h5>
+        <div class="table-responsive" tabindex="0" aria-label="Submitted registrations; scroll horizontally on small screens">
+          <table class="table table-striped table-hover align-middle">
+            <thead>
+              <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Password</th>
+                <th scope="col">Australian Resident</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(user, index) in submittedUsers" :key="index">
+                <td>{{ user.username }}</td>
+                <td aria-label="Password hidden">{{ user.password ? '••••••••' : '' }}</td>
+                <td>{{ user.isAustralian ? 'true' : 'false' }}</td>
+                <td>{{ user.gender }}</td>
+                <td>{{ user.reason }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -239,9 +223,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 
 const formData = ref({
   username: '',
